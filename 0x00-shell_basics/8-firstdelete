@@ -1,2 +1,2 @@
 #!/bin/bash
-rm file_name
+rm betty
