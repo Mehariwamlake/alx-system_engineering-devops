@@ -1,11 +1,29 @@
 #!/usr/bin/env bash
-# Install the load balancer
+# Install the HAProxy and configure it for 2 machines
 
-
+# Update & Upgrade dependencies and packages
 sudo apt-get -y update
 sudo apt-get -y upgrade
-sudo apt-get -y install haproxy
-sudo sed -i 's/ENABLED=0/ENABLED=1/' /etc/default/haproxy
-sudo cp /etc/haproxy/haproxy.cfg /etc/haproxy/haproxy.cfg.original
-sudo sed -i "$ a\listen 540-lb-01\n\tbind *:80\n\tmode http\n\tbalance roundrobin\n\toption httpclose\n\toption forwardfor\n\tserver 4235-web-02 34.204.188.253 check\n\tserver 4235-web-01 44.197.192.143 check" /etc/haproxy/haproxy.cfg
-sudo service haproxy start
+sudo apt-get install -y haproxy
+
+# Configure HAProxy init
+echo "ENABLED=1" >> /etc/default/haproxy
+
+# Create Backup of haproxy.cfg and HAProxy file
+sudo cp /etc/default/haproxy /etc/default/haproxy.bak
+sudo cp /etc/haproxy/haproxy.cfg /etc/haproxy/haproxy.bak
+
+# Configure Round Robin
+echo "
+# Load balanced Pool
+frontend front
+        bind *:80
+	    default_backend web-back
+backend web-back
+        balance roundrobin
+        server 4235-web-01 35.174.19.28:80 check
+        server 4235-web-02 44.210.83.41:80 check" >> /etc/haproxy/haproxy.cfg
+
+# Restart the HAProxy
+sudo service haproxy reload
+sudo service haproxy restart

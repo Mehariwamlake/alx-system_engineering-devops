@@ -1,9 +1,15 @@
 #!/usr/bin/env bash
-#to configure a new server
-
-sudo apt-get update
+# Updates dependencies and packages, plus install de nginx server service
+sudo apt-get -y update
 sudo apt-get -y install nginx
-sudo service nginx start
-sudo sed -i "11i\\\tadd_header X-Served-By $HOSTNAME;" /etc/nginx/nginx.conf
+sudo apt-get -y upgrade
+
+# Search the configuration file
+sudo sed -i '/listen 80 default_server;/a add_header X-Served-By $HOSTNAME;' /etc/nginx/sites-available/default
+
 echo "Hello World!" | sudo tee /usr/share/nginx/html/index.html
+
+# Restart the nginx service for changes
 sudo service nginx restart
+
+
